@@ -13,12 +13,14 @@ import json
 import os
 import time
 import traceback
+import uuid
 
 import websockets
 
 from dedalus_agent import analyze_scene
 from prompts import REALTIME_SYSTEM_PROMPT
 from tools import REALTIME_TOOLS
+from session_logger import SessionLogger
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 REALTIME_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17"
@@ -41,6 +43,11 @@ class Orchestrator:
         self._last_user_speech_time = time.time()
         self._last_agent_speech_time = time.time()
         self._follow_up_count = 0  # How many follow-ups we've sent without user response
+        
+        # Session logging
+        session_id = str(uuid.uuid4())
+        self.session_logger = SessionLogger(session_id)
+        self._current_assistant_text = ""  # Track current assistant response
 
     async def run(self):
         self.rt_ws = await websockets.connect(
@@ -65,6 +72,13 @@ class Orchestrator:
         self._shutdown = True
         if self.rt_ws:
             await self.rt_ws.close()
+        
+        # Save session logs
+        try:
+            self.session_logger.save_session_log()
+            self.session_logger.generate_ems_report()
+        except Exception as e:
+            print(f"[Orchestrator] Error saving session logs: {e}")
 
     async def _configure_session(self):
         await self.rt_ws.send(
@@ -142,11 +156,16 @@ class Orchestrator:
 
                 elif event_type == "response.audio_transcript.delta":
                     delta = event.get("delta", "")
+                    self._current_assistant_text += delta
+                    self.session_logger.log_assistant_transcript(delta, is_delta=True)
                     await self._send_ios(
                         {"type": "transcript", "role": "assistant", "delta": delta}
                     )
 
                 elif event_type == "response.audio_transcript.done":
+                    if self._current_assistant_text:
+                        self.session_logger.log_assistant_transcript(self._current_assistant_text, is_delta=False)
+                        self._current_assistant_text = ""
                     await self._send_ios(
                         {"type": "transcript_done", "role": "assistant"}
                     )
@@ -159,6 +178,7 @@ class Orchestrator:
                     self.recent_user_transcript = text
                     self._last_user_speech_time = time.time()
                     self._follow_up_count = 0  # Reset — user is engaged
+                    self.session_logger.log_user_transcript(text)
                     await self._send_ios(
                         {"type": "transcript", "role": "user", "text": text}
                     )
@@ -167,6 +187,7 @@ class Orchestrator:
                     self._response_in_progress = False
                     self._last_user_speech_time = time.time()
                     self._follow_up_count = 0
+                    self._current_assistant_text = ""  # Reset assistant text on interrupt
                     await self._send_ios({"type": "interrupt"})
 
                 elif event_type == "response.output_item.done":
@@ -212,6 +233,7 @@ class Orchestrator:
                         continue
 
                     self._last_scene_observation = observation
+                    self.session_logger.log_scene_observation(observation)
 
                     await self.rt_ws.send(
                         json.dumps(
@@ -368,6 +390,7 @@ class Orchestrator:
             body_region = args.get("body_region", "")
             self.scenario_state = scenario.upper()
             self.scenario_severity = severity
+            self.session_logger.log_scenario_update(scenario, severity, summary, body_region)
             print(f"[Scenario] {scenario} ({severity}): {summary} [region: {body_region}]")
             # Notify iOS for potential UI display + wireframe animation
             await self._send_ios({
@@ -379,6 +402,7 @@ class Orchestrator:
             })
         else:
             # All other tools go to iOS for local execution
+            self.session_logger.log_tool_call(name, args)
             await self._send_ios({"type": "tool", "name": name, "params": args})
 
         await self.rt_ws.send(

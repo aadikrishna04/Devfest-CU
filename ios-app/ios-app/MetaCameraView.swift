@@ -6,6 +6,7 @@ struct MetaCameraView: View {
     @ObservedObject var viewModel: WearablesViewModel
     @StateObject private var streamVM: StreamViewModel
     @State private var selectedPage = 0
+    @State private var showExportView = false
 
     init(wearables: WearablesInterface, viewModel: WearablesViewModel) {
         self.wearables = wearables
@@ -338,6 +339,9 @@ struct MetaCameraView: View {
                     .padding(.bottom, 30)
             }
         }
+        .sheet(isPresented: $showExportView) {
+            ExportView(viewModel: streamVM, isPresented: $showExportView)
+        }
     }
 
     // MARK: Video Feed Page
@@ -476,6 +480,18 @@ struct MetaCameraView: View {
                     .foregroundColor(.white)
                     .frame(width: 52, height: 52)
                     .background(MedkitTheme.darkSurface)
+                    .clipShape(Circle())
+            }
+
+            Spacer()
+
+            // Export button
+            Button(action: { showExportView = true }) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.title3)
+                    .foregroundColor(.white)
+                    .frame(width: 52, height: 52)
+                    .background(MedkitTheme.accent.opacity(0.8))
                     .clipShape(Circle())
             }
 

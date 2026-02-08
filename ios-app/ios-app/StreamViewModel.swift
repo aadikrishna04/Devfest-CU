@@ -38,8 +38,10 @@ class StreamViewModel: ObservableObject {
     let audioManager = AudioManager()
     let wsManager = WebSocketManager()
     let toolExecutor = ToolExecutor()
+    let sessionLogger = SessionLogger()
 
     private var streamSession: StreamSession
+    private var sceneObservations: [String] = []
     private var stateToken: AnyListenerToken?
     private var frameToken: AnyListenerToken?
     private var errorToken: AnyListenerToken?
@@ -83,6 +85,10 @@ class StreamViewModel: ObservableObject {
                 guard let self else { return }
                 if let image = frame.makeUIImage() {
                     self.currentFrame = image
+                    // Record frame for video
+                    if self.sessionLogger.isRecording {
+                        self.sessionLogger.appendVideoFrame(image)
+                    }
                 }
             }
         }
@@ -100,8 +106,30 @@ class StreamViewModel: ObservableObject {
         // Forward WebSocketManager changes for SwiftUI
         wsManager.$userTranscript.receive(on: DispatchQueue.main).assign(to: &$userTranscript)
         wsManager.$agentTranscript.receive(on: DispatchQueue.main).assign(to: &$agentTranscript)
-        wsManager.$latestSceneObservation.receive(on: DispatchQueue.main).assign(to: &$sceneObservation)
+        wsManager.$latestSceneObservation.receive(on: DispatchQueue.main).sink { [weak self] observation in
+            self?.sceneObservation = observation
+            if !observation.isEmpty && !(self?.sceneObservations.contains(observation) ?? false) {
+                self?.sceneObservations.append(observation)
+                self?.sessionLogger.logSceneObservation(observation)
+            }
+        }.store(in: &cancellables)
         wsManager.$isConnected.receive(on: DispatchQueue.main).assign(to: &$isConnected)
+        
+        // Set up transcript logging callbacks
+        wsManager.onUserTranscript = { [weak self] text in
+            guard let self = self, !text.isEmpty else { return }
+            self.sessionLogger.logUserTranscript(text)
+        }
+        
+        wsManager.onAgentTranscriptDelta = { [weak self] delta in
+            guard let self = self, !delta.isEmpty else { return }
+            self.sessionLogger.logAgentTranscript(delta, isComplete: false)
+        }
+        
+        wsManager.onAgentTranscriptComplete = { [weak self] completeText in
+            guard let self = self, !completeText.isEmpty else { return }
+            self.sessionLogger.logAgentTranscript(completeText, isComplete: true)
+        }
 
         // Forward AudioManager activation state
         audioManager.$isActivated.receive(on: DispatchQueue.main).assign(to: &$isActivated)
@@ -193,6 +221,13 @@ class StreamViewModel: ObservableObject {
 
         // 8. Start frame sampling → send JPEG to backend every 3s
         startFrameSampling()
+        
+        // 9. Start video recording
+        do {
+            try sessionLogger.startVideoRecording()
+        } catch {
+            NSLog("[StreamViewModel] Failed to start video recording: \(error)")
+        }
     }
 
     func stopStreaming() async {
@@ -202,6 +237,15 @@ class StreamViewModel: ObservableObject {
         toolExecutor.stopAll()
         wsManager.disconnect()
         await streamSession.stop()
+        
+        // Stop video recording
+        if sessionLogger.isRecording {
+            do {
+                _ = try await sessionLogger.stopVideoRecording()
+            } catch {
+                NSLog("[StreamViewModel] Failed to stop video recording: \(error)")
+            }
+        }
     }
 
     func dismissError() {
@@ -255,5 +299,49 @@ class StreamViewModel: ObservableObject {
         case .audioStreamingError: return "Audio streaming error."
         @unknown default: return "Unknown streaming error."
         }
+    }
+    
+    // MARK: - Session Logging & Export
+    
+    func exportVideo() async throws -> URL {
+        // If recording, stop it first
+        if sessionLogger.isRecording {
+            return try await sessionLogger.stopVideoRecording()
+        }
+        
+        // Otherwise, try to find the last recorded video
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let videoURL = documentsPath.appendingPathComponent("\(sessionLogger.getSessionId()).mp4")
+        
+        if FileManager.default.fileExists(atPath: videoURL.path) {
+            return videoURL
+        } else {
+            throw NSError(domain: "StreamViewModel", code: 1, userInfo: [NSLocalizedDescriptionKey: "No video recording available"])
+        }
+    }
+    
+    func exportTranscriptPDF() throws -> URL {
+        return try sessionLogger.exportTranscriptPDF(
+            scenario: currentScenario,
+            severity: scenarioSeverity,
+            summary: scenarioSummary,
+            bodyRegion: bodyRegion,
+            sceneObservations: sceneObservations
+        )
+    }
+    
+    func exportEMSReport() throws -> URL {
+        return try sessionLogger.generateEMSReport(
+            scenario: currentScenario,
+            severity: scenarioSeverity,
+            summary: scenarioSummary,
+            bodyRegion: bodyRegion,
+            sceneObservations: sceneObservations
+        )
+    }
+    
+    var hasSessionData: Bool {
+        // Check if there's any data to export
+        return !sessionLogger.getSessionId().isEmpty
     }
 }

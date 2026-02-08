@@ -14,6 +14,9 @@ class WebSocketManager: ObservableObject {
     var onToolCommand: ((String, [String: Any]) -> Void)?
     var onInterrupt: (() -> Void)?
     var onScenarioUpdate: ((String, String, String, String) -> Void)?  // scenario, severity, summary, bodyRegion
+    var onUserTranscript: ((String) -> Void)?  // Called when complete user transcript is received
+    var onAgentTranscriptDelta: ((String) -> Void)?  // Called for each delta
+    var onAgentTranscriptComplete: ((String) -> Void)?  // Called when transcript is complete
 
     private var webSocketTask: URLSessionWebSocketTask?
     private var session: URLSession?
@@ -139,10 +142,16 @@ class WebSocketManager: ObservableObject {
             let role = json["role"] as? String ?? ""
             if role == "user" {
                 let text = json["text"] as? String ?? ""
-                DispatchQueue.main.async { self.userTranscript = text }
+                DispatchQueue.main.async {
+                    self.userTranscript = text
+                    self.onUserTranscript?(text)
+                }
             } else if role == "assistant" {
                 let delta = json["delta"] as? String ?? ""
-                DispatchQueue.main.async { self.agentTranscript += delta }
+                DispatchQueue.main.async {
+                    self.agentTranscript += delta
+                    self.onAgentTranscriptDelta?(delta)
+                }
             }
 
         case "interrupt":
@@ -167,7 +176,11 @@ class WebSocketManager: ObservableObject {
             onScenarioUpdate?(scenario, severity, summary, bodyRegion)
 
         case "transcript_done":
-            break  // Agent finished speaking — no action needed
+            // Agent finished speaking — log complete transcript
+            DispatchQueue.main.async {
+                let completeText = self.agentTranscript
+                self.onAgentTranscriptComplete?(completeText)
+            }
 
         default:
             NSLog("[WS] Unknown message type: \(type)")
