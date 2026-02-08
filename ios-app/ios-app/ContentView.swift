@@ -1,24 +1,11 @@
-//
-//  ContentView.swift
-//  ios-app
-//
-//  Created by Aadi Krishna on 2/7/26.
-//
+// ContentView.swift is no longer used.
+// The app entry point now launches MetaCameraView directly.
+// This file can be deleted from the Xcode project.
 
 import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+        Text("Not used — see MetaCameraView")
     }
-}
-
-#Preview {
-    ContentView()
 }

@@ -23,6 +23,9 @@ Pods/
 .swiftpm/
 .build/
 
+# Environment secrets
+.env
+
 # Other
 *.log
 *.tmp

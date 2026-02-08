@@ -6,13 +6,32 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		BEB2D0832F37EDCF00EB758C /* MWDATCamera in Frameworks */ = {isa = PBXBuildFile; productRef = BEB2D0822F37EDCF00EB758C /* MWDATCamera */; };
+		BEB2D0852F37EDCF00EB758C /* MWDATCore in Frameworks */ = {isa = PBXBuildFile; productRef = BEB2D0842F37EDCF00EB758C /* MWDATCore */; };
+		BEB2D0872F37EDCF00EB758C /* MWDATMockDevice in Frameworks */ = {isa = PBXBuildFile; productRef = BEB2D0862F37EDCF00EB758C /* MWDATMockDevice */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		BE2D07BA2F37C385007CCFF2 /* ios-app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ios-app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BEB2D0982F37F15300EB758C /* Exceptions for "ios-app" folder in "ios-app" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = BE2D07B92F37C385007CCFF2 /* ios-app */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BE2D07BC2F37C385007CCFF2 /* ios-app */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BEB2D0982F37F15300EB758C /* Exceptions for "ios-app" folder in "ios-app" target */,
+			);
 			path = "ios-app";
 			sourceTree = "<group>";
 		};
@@ -23,6 +42,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BEB2D0832F37EDCF00EB758C /* MWDATCamera in Frameworks */,
+				BEB2D0872F37EDCF00EB758C /* MWDATMockDevice in Frameworks */,
+				BEB2D0852F37EDCF00EB758C /* MWDATCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +87,9 @@
 			);
 			name = "ios-app";
 			packageProductDependencies = (
+				BEB2D0822F37EDCF00EB758C /* MWDATCamera */,
+				BEB2D0842F37EDCF00EB758C /* MWDATCore */,
+				BEB2D0862F37EDCF00EB758C /* MWDATMockDevice */,
 			);
 			productName = "ios-app";
 			productReference = BE2D07BA2F37C385007CCFF2 /* ios-app.app */;
@@ -94,6 +119,9 @@
 			);
 			mainGroup = BE2D07B12F37C385007CCFF2;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				BEB2D0812F37EDCF00EB758C /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BE2D07BB2F37C385007CCFF2 /* Products */;
 			projectDirPath = "";
@@ -177,6 +205,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "ios-app/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -234,6 +263,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "ios-app/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -251,8 +281,9 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 82K4L546Q4;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -282,8 +313,9 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 82K4L546Q4;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -328,6 +360,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BEB2D0812F37EDCF00EB758C /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/facebook/meta-wearables-dat-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.4.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BEB2D0822F37EDCF00EB758C /* MWDATCamera */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BEB2D0812F37EDCF00EB758C /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */;
+			productName = MWDATCamera;
+		};
+		BEB2D0842F37EDCF00EB758C /* MWDATCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BEB2D0812F37EDCF00EB758C /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */;
+			productName = MWDATCore;
+		};
+		BEB2D0862F37EDCF00EB758C /* MWDATMockDevice */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BEB2D0812F37EDCF00EB758C /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */;
+			productName = MWDATMockDevice;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = BE2D07B22F37C385007CCFF2 /* Project object */;
 }
