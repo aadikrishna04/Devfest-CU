@@ -31,9 +31,22 @@ export function Hero() {
               First-aid guidance in your ear, hands-free
             </p>
           </div>
-          <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed mb-8">
             An AI first-aid coach for Meta smart glasses. Voice-guided, hands-free emergency support with real-time visual aids.
           </p>
+          
+          {/* YouTube Video */}
+          <div className="mt-12 max-w-4xl mx-auto">
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}> {/* 16:9 aspect ratio */}
+              <iframe
+                className="absolute top-0 left-0 w-full h-full rounded-lg shadow-xl"
+                src="https://www.youtube.com/embed/yOZDYmdZSY0"
+                title="MedKit Demo Video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
         </div>
       </section>
     </>
