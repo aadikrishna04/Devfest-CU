@@ -1,0 +1,321 @@
+export function Architecture() {
+  return (
+    <section className="py-16 px-6 bg-white dark:bg-gray-950">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-4xl mb-4 text-gray-900 dark:text-white">Architecture</h2>
+        <p className="text-base text-gray-600 dark:text-gray-400 mb-12">
+          System flow from glasses to AI
+        </p>
+
+        {/* SVG Architecture Diagram - no box, large for readability */}
+        <div className="overflow-x-auto py-6">
+          <svg
+            viewBox="0 0 1860 960"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-auto min-w-[1400px] max-w-[1860px] mx-auto block"
+          >
+              <defs>
+                <marker id="a" viewBox="0 0 12 8" refX="11" refY="4" markerWidth="12" markerHeight="8" orient="auto"><path d="M0 0L12 4L0 8z" fill="#a0a0a8"/></marker>
+                <marker id="ar" viewBox="0 0 12 8" refX="11" refY="4" markerWidth="12" markerHeight="8" orient="auto"><path d="M0 0L12 4L0 8z" fill="#D4594D"/></marker>
+                <marker id="ag" viewBox="0 0 12 8" refX="11" refY="4" markerWidth="12" markerHeight="8" orient="auto"><path d="M0 0L12 4L0 8z" fill="#16A34A"/></marker>
+                <marker id="ab" viewBox="0 0 12 8" refX="11" refY="4" markerWidth="12" markerHeight="8" orient="auto"><path d="M0 0L12 4L0 8z" fill="#3B82F6"/></marker>
+                <marker id="ay" viewBox="0 0 12 8" refX="11" refY="4" markerWidth="12" markerHeight="8" orient="auto"><path d="M0 0L12 4L0 8z" fill="#D97706"/></marker>
+                <marker id="ap" viewBox="0 0 12 8" refX="11" refY="4" markerWidth="12" markerHeight="8" orient="auto"><path d="M0 0L12 4L0 8z" fill="#7C3AED"/></marker>
+                <filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="5" floodColor="#000" floodOpacity="0.06"/></filter>
+                <filter id="s2"><feDropShadow dx="0" dy="3" stdDeviation="8" floodColor="#000" floodOpacity="0.09"/></filter>
+              </defs>
+
+              {/* STAGE 1: HARDWARE INPUT */}
+              <rect x="20" y="160" width="180" height="500" rx="18" fill="#f5f5f7" stroke="#d4d4d8" strokeWidth="1.5" filter="url(#s2)"/>
+              <rect x="56" y="140" width="108" height="26" rx="13" fill="#52525b" filter="url(#s)"/>
+              <text x="110" y="158" textAnchor="middle" fontSize="11" fontWeight="700" fill="white">INPUT</text>
+
+              {/* Glasses */}
+              <text x="110" y="210" textAnchor="middle" fontSize="44">&#x1F576;&#xFE0F;</text>
+              <text x="110" y="242" textAnchor="middle" fontSize="14" fontWeight="700" fill="#1a1a1e">Meta Ray-Ban</text>
+              <text x="110" y="258" textAnchor="middle" fontSize="9" fill="#73737a">Meta Wearables DAT SDK</text>
+
+              {/* Camera output */}
+              <rect x="38" y="272" width="144" height="56" rx="10" fill="white" stroke="#3B82F6" strokeWidth="1.5" filter="url(#s)"/>
+              <text x="44" y="292" fontSize="16">&#x1F4F9;</text>
+              <text x="110" y="294" textAnchor="middle" fontSize="11" fontWeight="600" fill="#3B82F6">Camera Feed</text>
+              <text x="110" y="312" textAnchor="middle" fontSize="9" fill="#73737a">StreamSession video frames</text>
+
+              {/* Mic output */}
+              <rect x="38" y="344" width="144" height="56" rx="10" fill="white" stroke="#D4594D" strokeWidth="1.5" filter="url(#s)"/>
+              <text x="44" y="364" fontSize="16">&#x1F3A4;</text>
+              <text x="110" y="366" textAnchor="middle" fontSize="11" fontWeight="600" fill="#D4594D">Microphone</text>
+              <text x="110" y="384" textAnchor="middle" fontSize="9" fill="#73737a">HFP Bluetooth audio</text>
+
+              {/* iPhone fallback */}
+              <rect x="38" y="420" width="144" height="84" rx="10" fill="white" stroke="#d4d4d8" strokeWidth="1.5" filter="url(#s)"/>
+              <text x="110" y="454" textAnchor="middle" fontSize="28">&#x1F4F1;</text>
+              <text x="110" y="478" textAnchor="middle" fontSize="11" fontWeight="600" fill="#73737a">iPhone Fallback</text>
+              <text x="110" y="494" textAnchor="middle" fontSize="9" fill="#a0a0a8">Back camera + mic</text>
+
+              {/* Speaker label */}
+              <rect x="38" y="530" width="144" height="50" rx="10" fill="white" stroke="#16A34A" strokeWidth="1.5" filter="url(#s)"/>
+              <text x="44" y="552" fontSize="16">&#x1F50A;</text>
+              <text x="110" y="552" textAnchor="middle" fontSize="11" fontWeight="600" fill="#16A34A">Speaker</text>
+              <text x="110" y="568" textAnchor="middle" fontSize="9" fill="#73737a">AI voice via HFP</text>
+
+              {/* BLE badge */}
+              <rect x="44" y="600" width="132" height="24" rx="8" fill="#52525b" opacity="0.06"/>
+              <text x="110" y="617" textAnchor="middle" fontSize="9" fontWeight="600" fill="#52525b">BLE + HFP Bluetooth</text>
+
+              {/* STAGE 2: ON-DEVICE PROCESSING */}
+
+              {/* JPEG compression */}
+              <rect x="270" y="200" width="150" height="80" rx="12" fill="white" stroke="#3B82F6" strokeWidth="1.5" filter="url(#s)"/>
+              <text x="345" y="230" textAnchor="middle" fontSize="24">&#x1F5BC;&#xFE0F;</text>
+              <text x="345" y="254" textAnchor="middle" fontSize="11" fontWeight="700" fill="#3B82F6">JPEG Compress</text>
+              <text x="345" y="270" textAnchor="middle" fontSize="9" fill="#73737a">Sampled every 3 seconds</text>
+
+              {/* Arrow: camera -> JPEG */}
+              <line x1="182" y1="300" x2="266" y2="252" stroke="#3B82F6" strokeWidth="2" markerEnd="url(#ab)"/>
+
+              {/* Face Blur */}
+              <rect x="470" y="200" width="150" height="80" rx="12" fill="white" stroke="#7C3AED" strokeWidth="2" filter="url(#s2)"/>
+              <text x="545" y="230" textAnchor="middle" fontSize="24">&#x1FAE5;</text>
+              <text x="545" y="254" textAnchor="middle" fontSize="11" fontWeight="700" fill="#7C3AED">Face Blur</text>
+              <text x="545" y="270" textAnchor="middle" fontSize="9" fill="#73737a">Privacy filter on all faces</text>
+
+              {/* Arrow: JPEG -> Face Blur */}
+              <line x1="420" y1="240" x2="466" y2="240" stroke="#3B82F6" strokeWidth="2" markerEnd="url(#ab)"/>
+
+              {/* Arrow: Face Blur -> WebSocket */}
+              <path d="M620 240 Q660 240 660 270 L660 300 Q660 310 696 310" stroke="#3B82F6" strokeWidth="2" fill="none" markerEnd="url(#ab)"/>
+              <text x="672" y="268" fontSize="8" fontWeight="600" fill="#3B82F6">base64</text>
+
+              {/* AUDIO PROCESSING PIPELINE */}
+
+              {/* PCM16 conversion */}
+              <rect x="270" y="370" width="150" height="80" rx="12" fill="white" stroke="#D4594D" strokeWidth="1.5" filter="url(#s)"/>
+              <text x="345" y="400" textAnchor="middle" fontSize="24">&#x1F504;</text>
+              <text x="345" y="424" textAnchor="middle" fontSize="11" fontWeight="700" fill="#D4594D">PCM16 Convert</text>
+              <text x="345" y="440" textAnchor="middle" fontSize="9" fill="#73737a">24kHz mono, int16</text>
+
+              {/* Arrow: mic -> PCM16 */}
+              <line x1="182" y1="372" x2="266" y2="400" stroke="#D4594D" strokeWidth="2" markerEnd="url(#ar)"/>
+
+              {/* Wake Word */}
+              <rect x="470" y="370" width="150" height="80" rx="12" fill="white" stroke="#D4594D" strokeWidth="1.5" filter="url(#s)"/>
+              <text x="545" y="398" textAnchor="middle" fontSize="22">&#x1F4AC;</text>
+              <text x="545" y="422" textAnchor="middle" fontSize="11" fontWeight="700" fill="#D4594D">Wake Word Gate</text>
+              <text x="545" y="438" textAnchor="middle" fontSize="9" fill="#73737a">SFSpeechRecognizer</text>
+
+              {/* Arrow: PCM16 -> Wake Word */}
+              <line x1="420" y1="410" x2="466" y2="410" stroke="#D4594D" strokeWidth="2" markerEnd="url(#ar)"/>
+
+              {/* "Medkit" label on wake word */}
+              <rect x="488" y="452" width="114" height="20" rx="7" fill="#D4594D" opacity="0.08"/>
+              <text x="545" y="466" textAnchor="middle" fontSize="9" fontWeight="600" fill="#D4594D">{`Says "Medkit" → activate`}</text>
+
+              {/* Arrow: Wake Word -> WebSocket */}
+              <line x1="620" y1="410" x2="696" y2="410" stroke="#D4594D" strokeWidth="2" markerEnd="url(#ar)"/>
+              <text x="660" y="400" textAnchor="middle" fontSize="8" fontWeight="600" fill="#D4594D">base64</text>
+
+              {/* WebSocket bridge */}
+              <rect x="700" y="280" width="80" height="170" rx="14" fill="white" stroke="#52525b" strokeWidth="2" filter="url(#s2)"/>
+              <text x="740" y="346" textAnchor="middle" fontSize="11" fontWeight="800" fill="#52525b" transform="rotate(-90,740,360)">WebSocket</text>
+              <text x="740" y="420" textAnchor="middle" fontSize="8" fontWeight="600" fill="#73737a">wss://</text>
+              <text x="740" y="434" textAnchor="middle" fontSize="8" fontWeight="600" fill="#73737a">Modal</text>
+
+              {/* On-device processing label */}
+              <rect x="300" y="168" width="200" height="24" rx="12" fill="#f5f5f7" stroke="#d4d4d8" strokeWidth="1"/>
+              <text x="400" y="185" textAnchor="middle" fontSize="10" fontWeight="700" fill="#52525b">ON-DEVICE PROCESSING (iOS)</text>
+
+              {/* STAGE 3: DEDALUS ORCHESTRATION */}
+
+              {/* Dedalus big container */}
+              <rect x="830" y="50" width="780" height="680" rx="24" fill="#FFFBEB" opacity="0.45" stroke="#D97706" strokeWidth="2"/>
+              <rect x="1090" y="26" width="280" height="32" rx="16" fill="#D97706" filter="url(#s2)"/>
+              <text x="1230" y="48" textAnchor="middle" fontSize="13" fontWeight="700" fill="white">DEDALUS ORCHESTRATION LAYER</text>
+
+              {/* K2 Think */}
+              <rect x="900" y="290" width="280" height="150" rx="16" fill="white" stroke="#D97706" strokeWidth="2.5" filter="url(#s2)"/>
+              <text x="1040" y="334" textAnchor="middle" fontSize="36">&#x1F9E0;</text>
+              <text x="1040" y="372" textAnchor="middle" fontSize="20" fontWeight="800" fill="#92400E">K2 Think</text>
+              <text x="1040" y="394" textAnchor="middle" fontSize="12" fill="#73737a">Orchestrating Agent</text>
+              <text x="1040" y="414" textAnchor="middle" fontSize="10" fill="#a0a0a8">Routes inputs to the right model, coordinates responses</text>
+
+              {/* Arrows: WebSocket -> K2 Think */}
+              <line x1="780" y1="320" x2="896" y2="360" stroke="#3B82F6" strokeWidth="2.5" markerEnd="url(#ab)"/>
+              <text x="826" y="326" fontSize="9" fontWeight="600" fill="#3B82F6">frames</text>
+
+              <line x1="780" y1="410" x2="896" y2="390" stroke="#D4594D" strokeWidth="2.5" markerEnd="url(#ar)"/>
+              <text x="826" y="418" fontSize="9" fontWeight="600" fill="#D4594D">audio</text>
+
+              {/* VOICE MODEL */}
+              <rect x="1280" y="80" width="260" height="170" rx="16" fill="white" stroke="#16A34A" strokeWidth="2" filter="url(#s2)"/>
+              <rect x="1348" y="60" width="124" height="26" rx="13" fill="#16A34A" filter="url(#s)"/>
+              <text x="1410" y="78" textAnchor="middle" fontSize="11" fontWeight="700" fill="white">VOICE MODEL</text>
+
+              <text x="1410" y="124" textAnchor="middle" fontSize="32">&#x1F5E3;&#xFE0F;</text>
+              <text x="1410" y="156" textAnchor="middle" fontSize="14" fontWeight="700" fill="#1a1a1e">OpenAI Realtime</text>
+              <text x="1410" y="176" textAnchor="middle" fontSize="11" fill="#73737a">gpt-4o-realtime-preview</text>
+              <text x="1410" y="198" textAnchor="middle" fontSize="10" fill="#73737a">{"Server VAD  \u2022  Whisper-1"}</text>
+              <text x="1410" y="214" textAnchor="middle" fontSize="10" fill="#73737a">{"PCM16 in/out  \u2022  Tool calling"}</text>
+              <rect x="1300" y="230" width="220" height="18" rx="6" fill="#16A34A" opacity="0.08"/>
+              <text x="1410" y="243" textAnchor="middle" fontSize="9" fontWeight="600" fill="#16A34A">Direct WebSocket to OpenAI</text>
+
+              {/* K2 -> Voice Model */}
+              <path d="M1100 310 Q1200 310 1200 200 L1276 170" stroke="#D4594D" strokeWidth="2.5" fill="none" markerEnd="url(#ar)"/>
+              <rect x="1186" y="244" width="68" height="18" rx="6" fill="#D4594D" opacity="0.10"/>
+              <text x="1220" y="257" textAnchor="middle" fontSize="9" fontWeight="600" fill="#D4594D">speech</text>
+
+              {/* VISION MODEL */}
+              <rect x="1280" y="480" width="260" height="170" rx="16" fill="white" stroke="#D97706" strokeWidth="2" filter="url(#s2)"/>
+              <rect x="1348" y="460" width="124" height="26" rx="13" fill="#D97706" filter="url(#s)"/>
+              <text x="1410" y="478" textAnchor="middle" fontSize="11" fontWeight="700" fill="white">VISION MODEL</text>
+
+              <text x="1410" y="524" textAnchor="middle" fontSize="32">&#x1F441;&#xFE0F;</text>
+              <text x="1410" y="556" textAnchor="middle" fontSize="14" fontWeight="700" fill="#1a1a1e">GPT-4o Vision</text>
+              <text x="1410" y="576" textAnchor="middle" fontSize="11" fill="#73737a">via AsyncDedalus SDK</text>
+              <text x="1410" y="596" textAnchor="middle" fontSize="10" fill="#73737a">{`model: "openai/gpt-4o"`}</text>
+              <text x="1410" y="614" textAnchor="middle" fontSize="10" fill="#73737a">{"JPEG → 1-2 sentence scene description"}</text>
+              <rect x="1300" y="626" width="220" height="18" rx="6" fill="#D97706" opacity="0.08"/>
+              <text x="1410" y="639" textAnchor="middle" fontSize="9" fontWeight="600" fill="#D97706">DAuth: keys never on our server</text>
+
+              {/* K2 -> Vision Model */}
+              <path d="M1100 420 Q1200 420 1200 530 L1276 555" stroke="#3B82F6" strokeWidth="2.5" fill="none" markerEnd="url(#ab)"/>
+              <rect x="1186" y="466" width="84" height="18" rx="6" fill="#3B82F6" opacity="0.10"/>
+              <text x="1228" y="479" textAnchor="middle" fontSize="9" fontWeight="600" fill="#3B82F6">blurred frames</text>
+
+              {/* Vision output -> injected into Voice Model */}
+              <path d="M1540 530 Q1580 530 1580 360 Q1580 180 1540 170" stroke="#D97706" strokeWidth="2" fill="none" markerEnd="url(#ay)" strokeDasharray="6,3"/>
+              <rect x="1570" y="320" width="110" height="40" rx="8" fill="white" stroke="#D97706" strokeWidth="1.5" filter="url(#s)"/>
+              <text x="1625" y="338" textAnchor="middle" fontSize="9" fontWeight="700" fill="#D97706">[VISUAL CONTEXT]</text>
+              <text x="1625" y="352" textAnchor="middle" fontSize="9" fontWeight="700" fill="#D97706">[SCENE UPDATE]</text>
+
+              {/* Voice response back to user */}
+              <path d="M1280 200 L860 200 Q840 200 840 220 L840 510 Q840 530 830 530" stroke="#16A34A" strokeWidth="2.5" fill="none" strokeDasharray="6,3"/>
+              <line x1="830" y1="530" x2="780" y2="460" stroke="#16A34A" strokeWidth="2" strokeDasharray="6,3"/>
+              <path d="M700 445 Q660 445 660 510 L660 555 Q660 560 400 560 L186 555" stroke="#16A34A" strokeWidth="2" fill="none" strokeDasharray="6,3" markerEnd="url(#ag)"/>
+              <rect x="856" y="490" width="110" height="20" rx="7" fill="#16A34A" opacity="0.10"/>
+              <text x="911" y="504" textAnchor="middle" fontSize="9" fontWeight="700" fill="#16A34A">AI voice response</text>
+
+              {/* TOOLS */}
+              <rect x="860" y="520" width="290" height="190" rx="16" fill="white" stroke="#7C3AED" strokeWidth="1.5" filter="url(#s2)"/>
+              <rect x="940" y="504" width="130" height="24" rx="12" fill="#7C3AED" filter="url(#s)"/>
+              <text x="1005" y="521" textAnchor="middle" fontSize="11" fontWeight="700" fill="white">TOOL CALLS</text>
+
+              <rect x="878" y="544" width="120" height="40" rx="8" fill="#F5F3FF" stroke="#DDD6FE" strokeWidth="1"/>
+              <text x="938" y="562" textAnchor="middle" fontSize="10" fontWeight="700" fill="#7C3AED">set_scenario</text>
+              <text x="938" y="576" textAnchor="middle" fontSize="8" fill="#73737a">type + severity + region</text>
+
+              <rect x="1012" y="544" width="120" height="40" rx="8" fill="#F5F3FF" stroke="#DDD6FE" strokeWidth="1"/>
+              <text x="1072" y="562" textAnchor="middle" fontSize="10" fontWeight="700" fill="#7C3AED">start_metronome</text>
+              <text x="1072" y="576" textAnchor="middle" fontSize="8" fill="#73737a">CPR rhythm (110 BPM)</text>
+
+              <rect x="878" y="596" width="120" height="40" rx="8" fill="#F5F3FF" stroke="#DDD6FE" strokeWidth="1"/>
+              <text x="938" y="614" textAnchor="middle" fontSize="10" fontWeight="700" fill="#7C3AED">start_timer</text>
+              <text x="938" y="628" textAnchor="middle" fontSize="8" fill="#73737a">Countdown (switch, hold)</text>
+
+              <rect x="1012" y="596" width="120" height="40" rx="8" fill="#F5F3FF" stroke="#DDD6FE" strokeWidth="1"/>
+              <text x="1072" y="614" textAnchor="middle" fontSize="10" fontWeight="700" fill="#7C3AED">show_ui</text>
+              <text x="1072" y="628" textAnchor="middle" fontSize="8" fill="#73737a">Checklist / alert card</text>
+
+              <rect x="878" y="650" width="254" height="24" rx="8" fill="#7C3AED" opacity="0.06"/>
+              <text x="1005" y="667" textAnchor="middle" fontSize="9" fontWeight="600" fill="#7C3AED">{"→ Routed to iOS ToolExecutor via WebSocket"}</text>
+
+              {/* Arrow: K2 -> Tools */}
+              <line x1="1040" y1="440" x2="1005" y2="516" stroke="#7C3AED" strokeWidth="2" markerEnd="url(#ap)"/>
+
+              {/* Arrow: Tools -> iOS */}
+              <path d="M860 660 Q810 660 810 600 Q810 450 780 440" stroke="#7C3AED" strokeWidth="1.5" fill="none" strokeDasharray="5,3" markerEnd="url(#ap)"/>
+
+              {/* iOS TOOL EXECUTION */}
+              <rect x="270" y="530" width="370" height="180" rx="16" fill="white" stroke="#7C3AED" strokeWidth="1.5" filter="url(#s)"/>
+              <rect x="380" y="514" width="150" height="24" rx="12" fill="#7C3AED" filter="url(#s)"/>
+              <text x="455" y="531" textAnchor="middle" fontSize="10" fontWeight="700" fill="white">iOS TOOL EXECUTION</text>
+
+              <rect x="290" y="554" width="100" height="56" rx="10" fill="#F5F3FF" stroke="#DDD6FE" strokeWidth="1"/>
+              <text x="340" y="575" textAnchor="middle" fontSize="18">&#x1F3B5;</text>
+              <text x="340" y="596" textAnchor="middle" fontSize="9" fontWeight="600" fill="#7C3AED">Metronome</text>
+              <text x="340" y="607" textAnchor="middle" fontSize="8" fill="#73737a">880Hz via HFP</text>
+
+              <rect x="400" y="554" width="100" height="56" rx="10" fill="#F5F3FF" stroke="#DDD6FE" strokeWidth="1"/>
+              <text x="450" y="575" textAnchor="middle" fontSize="18">&#x23F1;&#xFE0F;</text>
+              <text x="450" y="596" textAnchor="middle" fontSize="9" fontWeight="600" fill="#7C3AED">Timers</text>
+              <text x="450" y="607" textAnchor="middle" fontSize="8" fill="#73737a">Countdown UI</text>
+
+              <rect x="510" y="554" width="110" height="56" rx="10" fill="#F5F3FF" stroke="#DDD6FE" strokeWidth="1"/>
+              <text x="565" y="575" textAnchor="middle" fontSize="18">&#x1F5FA;&#xFE0F;</text>
+              <text x="565" y="596" textAnchor="middle" fontSize="9" fontWeight="600" fill="#7C3AED">AED / Hospital</text>
+              <text x="565" y="607" textAnchor="middle" fontSize="8" fill="#73737a">MapKit search</text>
+
+              <rect x="290" y="620" width="100" height="56" rx="10" fill="#F5F3FF" stroke="#DDD6FE" strokeWidth="1"/>
+              <text x="340" y="641" textAnchor="middle" fontSize="18">&#x1F4CB;</text>
+              <text x="340" y="662" textAnchor="middle" fontSize="9" fontWeight="600" fill="#7C3AED">UI Cards</text>
+              <text x="340" y="673" textAnchor="middle" fontSize="8" fill="#73737a">Checklist / alert</text>
+
+              <rect x="400" y="620" width="100" height="56" rx="10" fill="#F5F3FF" stroke="#DDD6FE" strokeWidth="1"/>
+              <text x="450" y="641" textAnchor="middle" fontSize="18">&#x1F4F9;</text>
+              <text x="450" y="662" textAnchor="middle" fontSize="9" fontWeight="600" fill="#7C3AED">Recording</text>
+              <text x="450" y="673" textAnchor="middle" fontSize="8" fill="#73737a">H.264 + AAC</text>
+
+              <rect x="510" y="620" width="110" height="56" rx="10" fill="#F5F3FF" stroke="#DDD6FE" strokeWidth="1"/>
+              <text x="565" y="641" textAnchor="middle" fontSize="18">&#x1F4C4;</text>
+              <text x="565" y="662" textAnchor="middle" fontSize="9" fontWeight="600" fill="#7C3AED">PDF Reports</text>
+              <text x="565" y="673" textAnchor="middle" fontSize="8" fill="#73737a">Session export</text>
+
+              {/* Tools back to WS */}
+              <path d="M700 410 Q690 420 690 500 Q690 620 640 640" stroke="#7C3AED" strokeWidth="1.5" fill="none" strokeDasharray="5,3" markerEnd="url(#ap)"/>
+
+              {/* DAuth DETAIL */}
+              <rect x="1240" y="710" width="360" height="200" rx="16" fill="white" stroke="#D97706" strokeWidth="2" filter="url(#s2)"/>
+              <rect x="1338" y="694" width="164" height="24" rx="12" fill="#D97706" filter="url(#s)"/>
+              <text x="1420" y="711" textAnchor="middle" fontSize="11" fontWeight="700" fill="white">DAuth Credential Flow</text>
+
+              {/* Step 1 */}
+              <rect x="1260" y="736" width="150" height="50" rx="10" fill="#FEF3C7" stroke="#FDE68A" strokeWidth="1.5"/>
+              <text x="1266" y="758" fontSize="14">&#x1F510;</text>
+              <text x="1335" y="757" textAnchor="middle" fontSize="10" fontWeight="700" fill="#92400E">1. Encrypt</text>
+              <text x="1335" y="773" textAnchor="middle" fontSize="9" fill="#A16207">API key encrypted on Modal</text>
+
+              {/* Step 2 */}
+              <rect x="1430" y="736" width="150" height="50" rx="10" fill="#FEF3C7" stroke="#FDE68A" strokeWidth="1.5"/>
+              <text x="1436" y="758" fontSize="14">&#x1F6E1;&#xFE0F;</text>
+              <text x="1505" y="757" textAnchor="middle" fontSize="10" fontWeight="700" fill="#92400E">2. Sealed Enclave</text>
+              <text x="1505" y="773" textAnchor="middle" fontSize="9" fill="#A16207">{"Rust, isolated → OpenAI"}</text>
+
+              {/* Step 3 */}
+              <rect x="1340" y="800" width="160" height="42" rx="10" fill="#FEF3C7" stroke="#FDE68A" strokeWidth="1.5"/>
+              <text x="1346" y="820" fontSize="14">&#x2705;</text>
+              <text x="1420" y="820" textAnchor="middle" fontSize="10" fontWeight="700" fill="#92400E">3. Secure Response</text>
+              <text x="1420" y="836" textAnchor="middle" fontSize="9" fill="#A16207">Back to backend</text>
+
+              {/* DAuth arrows */}
+              <line x1="1410" y1="761" x2="1426" y2="761" stroke="#D97706" strokeWidth="2" markerEnd="url(#ay)"/>
+              <line x1="1505" y1="786" x2="1460" y2="798" stroke="#D97706" strokeWidth="1.5" markerEnd="url(#ay)"/>
+
+              {/* Key callout */}
+              <rect x="1268" y="858" width="324" height="28" rx="14" fill="#92400E" opacity="0.05" stroke="#D97706" strokeWidth="1"/>
+              <text x="1430" y="877" textAnchor="middle" fontSize="10" fontWeight="700" fill="#92400E">{"🔒 Raw OpenAI keys never exist on our server"}</text>
+
+              {/* Arrow: Vision Model -> DAuth detail */}
+              <path d="M1410 650 L1410 706" stroke="#D97706" strokeWidth="1.5" fill="none" strokeDasharray="5,3" markerEnd="url(#ay)"/>
+              <text x="1424" y="680" fontSize="8" fill="#D97706" fontWeight="600">uses DAuth</text>
+
+              {/* LEGEND */}
+              <rect x="20" y="780" width="500" height="150" rx="16" fill="white" stroke="#e4e4e7" strokeWidth="1" filter="url(#s)"/>
+              <text x="270" y="808" textAnchor="middle" fontSize="13" fontWeight="700" fill="#1a1a1e">Data Flow Legend</text>
+
+              <rect x="46" y="824" width="12" height="4" rx="2" fill="#D4594D"/>
+              <text x="68" y="830" fontSize="11" fill="#1a1a1e" fontWeight="500">{"Speech: Mic → PCM16 → wake word → WebSocket → K2 → Realtime"}</text>
+
+              <rect x="46" y="848" width="12" height="4" rx="2" fill="#3B82F6"/>
+              <text x="68" y="854" fontSize="11" fill="#1a1a1e" fontWeight="500">{"Vision: Camera → JPEG → face blur → WebSocket → K2 → GPT-4o (Dedalus)"}</text>
+
+              <rect x="46" y="872" width="12" height="4" rx="2" fill="#16A34A"/>
+              <text x="68" y="878" fontSize="11" fill="#1a1a1e" fontWeight="500">{"Response: Realtime generates voice → back through WebSocket → glasses speaker"}</text>
+
+              <rect x="46" y="896" width="12" height="4" rx="2" fill="#7C3AED"/>
+              <text x="68" y="902" fontSize="11" fill="#1a1a1e" fontWeight="500">{"Tools: K2 calls tools → routed to iOS → metronome / timers / maps / UI cards"}</text>
+            </svg>
+        </div>
+      </div>
+    </section>
+  );
+}

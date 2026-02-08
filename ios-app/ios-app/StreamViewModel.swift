@@ -6,7 +6,7 @@ import SwiftUI
 // MARK: - Configuration
 
 enum BackendConfig {
-    static let webSocketURL = "wss://aaditkrishna04--first-aid-coach-create-app-dev.modal.run/ws"
+    static let webSocketURL = "wss://aaditkrishna04--medkit-create-app-dev.modal.run/ws"
 }
 
 @MainActor
@@ -20,12 +20,13 @@ class StreamViewModel: ObservableObject {
     // Transcripts from backend
     @Published var userTranscript: String = ""
     @Published var agentTranscript: String = ""
+    @Published var partialUserTranscript: String = ""  // Live partial from on-device speech recognition
     @Published var sceneObservation: String = ""
     @Published var isConnected: Bool = false
 
     // Wake word / activation
     @Published var isActivated: Bool = false
-    @Published var wakeWordStatus: String = "Say \"Hey Coach\" to start"
+    @Published var wakeWordStatus: String = "Say \"Medkit\" to start"
 
     // Scenario from backend
     @Published var currentScenario: String = "none"
@@ -39,8 +40,13 @@ class StreamViewModel: ObservableObject {
     let wsManager = WebSocketManager()
     let toolExecutor = ToolExecutor()
     let sessionLogger = SessionLogger()
+    let phoneCameraCapture = PhoneCameraCapture()
 
     private var streamSession: StreamSession
+    private var isUsingPhoneCamera = false
+    private var phoneCameraFrameCancellable: AnyCancellable?
+    private var isUserSpeaking = false
+    private var partialBaseLength = 0  // Track where the current utterance starts in cumulative recognition
     private var sceneObservations: [String] = []
     private var stateToken: AnyListenerToken?
     private var frameToken: AnyListenerToken?
@@ -60,7 +66,7 @@ class StreamViewModel: ObservableObject {
         let deviceSelector = AutoDeviceSelector(wearables: wearables)
         let config = StreamSessionConfig(
             videoCodec: .raw,
-            resolution: .low,
+            resolution: .high,
             frameRate: 24
         )
         self.streamSession = StreamSession(streamSessionConfig: config, deviceSelector: deviceSelector)
@@ -115,9 +121,20 @@ class StreamViewModel: ObservableObject {
         }.store(in: &cancellables)
         wsManager.$isConnected.receive(on: DispatchQueue.main).assign(to: &$isConnected)
         
+        // Live partial user transcript from on-device speech recognition
+        audioManager.$partialTranscript.receive(on: DispatchQueue.main).sink { [weak self] text in
+            guard let self, self.isUserSpeaking else { return }
+            let newPortion = String(text.dropFirst(self.partialBaseLength)).trimmingCharacters(in: .whitespaces)
+            if !newPortion.isEmpty {
+                self.partialUserTranscript = newPortion
+            }
+        }.store(in: &cancellables)
+
         // Set up transcript logging callbacks
         wsManager.onUserTranscript = { [weak self] text in
             guard let self = self, !text.isEmpty else { return }
+            self.isUserSpeaking = false
+            self.partialUserTranscript = ""
             self.sessionLogger.logUserTranscript(text)
         }
         
@@ -149,6 +166,20 @@ class StreamViewModel: ObservableObject {
 
         wsManager.onInterrupt = { [weak self] in
             self?.audioManager.stopPlayback()
+            Task { @MainActor in
+                guard let self else { return }
+                self.isUserSpeaking = true
+                self.partialBaseLength = self.audioManager.partialTranscript.count
+                self.partialUserTranscript = ""
+            }
+        }
+
+        // Wire mic audio recording into video MP4
+        audioManager.onAudioDataForRecording = { [weak self] data in
+            guard let self else { return }
+            Task { @MainActor in
+                self.sessionLogger.appendAudioData(data)
+            }
         }
 
         // Handle scenario updates from backend
@@ -207,7 +238,10 @@ class StreamViewModel: ObservableObject {
         // 4. Wait for HFP to be ready
         try? await Task.sleep(nanoseconds: 2 * NSEC_PER_SEC)
 
-        // 5. Start the stream session (video from glasses)
+        // 5. Clear old session state
+        clearTranscripts()
+
+        // 6. Start the stream session (video from glasses)
         await streamSession.start()
 
         // 6. Connect WebSocket to Modal backend
@@ -230,27 +264,152 @@ class StreamViewModel: ObservableObject {
         }
     }
 
-    func stopStreaming() async {
+    func startStreamingWithPhoneCamera(emergency: Bool = false) async {
+        isUsingPhoneCamera = true
+
+        do {
+            try audioManager.setupAudioSession()
+        } catch {
+            showError("Audio setup failed: \(error.localizedDescription)")
+            isUsingPhoneCamera = false
+            return
+        }
+
+        let hasPerms = await audioManager.requestPermissions()
+        if !hasPerms {
+            showError("Microphone or speech recognition permission denied.")
+            isUsingPhoneCamera = false
+            return
+        }
+
+        let cameraGranted = await phoneCameraCapture.requestPermission()
+        if !cameraGranted {
+            showError("Camera permission denied. Enable it in Settings.")
+            isUsingPhoneCamera = false
+            return
+        }
+
+        if emergency {
+            audioManager.alwaysActive = true
+        }
+
+        try? await Task.sleep(nanoseconds: 500_000_000)
+
+        phoneCameraCapture.start()
+        if let err = phoneCameraCapture.errorMessage {
+            showError(err)
+            isUsingPhoneCamera = false
+            return
+        }
+        phoneCameraFrameCancellable = phoneCameraCapture.$currentFrame
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] frame in
+                self?.currentFrame = frame
+            }
+
+        streamingStatus = .streaming
+
+        // Clear old session state
+        clearTranscripts()
+
+        wsManager.connect(to: BackendConfig.webSocketURL)
+
+        audioManager.startCapture { [weak self] audioData in
+            self?.wsManager.sendAudio(audioData)
+        }
+
+        startFrameSampling()
+
+        do {
+            try sessionLogger.startVideoRecording()
+        } catch {
+            NSLog("[StreamViewModel] Failed to start video recording: \(error)")
+        }
+    }
+
+    func stopStreaming(sessionStore: SessionStore? = nil) async {
         frameSamplingTask?.cancel()
         frameSamplingTask = nil
         audioManager.stopCapture()
         toolExecutor.stopAll()
         wsManager.disconnect()
-        await streamSession.stop()
-        
+
+        if isUsingPhoneCamera {
+            phoneCameraFrameCancellable?.cancel()
+            phoneCameraFrameCancellable = nil
+            phoneCameraCapture.stop()
+            currentFrame = nil
+            streamingStatus = .stopped
+            isUsingPhoneCamera = false
+        } else {
+            await streamSession.stop()
+        }
+
         // Stop video recording
+        var videoFileName: String? = nil
         if sessionLogger.isRecording {
             do {
-                _ = try await sessionLogger.stopVideoRecording()
+                let videoURL = try await sessionLogger.stopVideoRecording()
+                videoFileName = videoURL.lastPathComponent
             } catch {
                 NSLog("[StreamViewModel] Failed to stop video recording: \(error)")
             }
+        }
+
+        // Auto-save session report
+        if let store = sessionStore {
+            autoSaveSession(store: store, videoFileName: videoFileName)
+        }
+    }
+
+    private func autoSaveSession(store: SessionStore, videoFileName: String?) {
+        do {
+            let reportURL = try sessionLogger.exportSessionReport(
+                scenario: currentScenario,
+                severity: scenarioSeverity,
+                summary: scenarioSummary,
+                bodyRegion: bodyRegion,
+                sceneObservations: sceneObservations
+            )
+
+            let saved = SavedSession(
+                id: sessionLogger.sessionId,
+                startTime: sessionLogger.getStartTime(),
+                endTime: Date(),
+                scenario: currentScenario,
+                severity: scenarioSeverity,
+                summary: scenarioSummary,
+                bodyRegion: bodyRegion,
+                reportFileName: reportURL.lastPathComponent,
+                videoFileName: videoFileName
+            )
+            store.save(saved)
+            NSLog("[StreamViewModel] Session auto-saved: \(saved.id)")
+        } catch {
+            NSLog("[StreamViewModel] Failed to auto-save session: \(error)")
         }
     }
 
     func dismissError() {
         showError = false
         errorMessage = ""
+    }
+
+    private func clearTranscripts() {
+        userTranscript = ""
+        agentTranscript = ""
+        partialUserTranscript = ""
+        sceneObservation = ""
+        isUserSpeaking = false
+        partialBaseLength = 0
+        currentScenario = "none"
+        scenarioSeverity = "minor"
+        scenarioSummary = ""
+        bodyRegion = ""
+        sceneObservations = []
+        wsManager.userTranscript = ""
+        wsManager.agentTranscript = ""
+        wsManager.latestSceneObservation = ""
     }
 
     // MARK: - Frame Sampling
@@ -263,7 +422,7 @@ class StreamViewModel: ObservableObject {
                    let jpegData = image.jpegData(compressionQuality: 0.5) {
                     wsManager.sendFrame(jpegData)
                 }
-                try? await Task.sleep(nanoseconds: 3 * NSEC_PER_SEC)
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
             }
         }
     }
@@ -301,47 +460,15 @@ class StreamViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Session Logging & Export
-    
-    func exportVideo() async throws -> URL {
-        // If recording, stop it first
-        if sessionLogger.isRecording {
-            return try await sessionLogger.stopVideoRecording()
-        }
-        
-        // Otherwise, try to find the last recorded video
-        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let videoURL = documentsPath.appendingPathComponent("\(sessionLogger.getSessionId()).mp4")
-        
-        if FileManager.default.fileExists(atPath: videoURL.path) {
-            return videoURL
-        } else {
-            throw NSError(domain: "StreamViewModel", code: 1, userInfo: [NSLocalizedDescriptionKey: "No video recording available"])
-        }
-    }
-    
-    func exportTranscriptPDF() throws -> URL {
-        return try sessionLogger.exportTranscriptPDF(
+    // MARK: - Session Export
+
+    func exportSessionReport() throws -> URL {
+        return try sessionLogger.exportSessionReport(
             scenario: currentScenario,
             severity: scenarioSeverity,
             summary: scenarioSummary,
             bodyRegion: bodyRegion,
             sceneObservations: sceneObservations
         )
-    }
-    
-    func exportEMSReport() throws -> URL {
-        return try sessionLogger.generateEMSReport(
-            scenario: currentScenario,
-            severity: scenarioSeverity,
-            summary: scenarioSummary,
-            bodyRegion: bodyRegion,
-            sceneObservations: sceneObservations
-        )
-    }
-    
-    var hasSessionData: Bool {
-        // Check if there's any data to export
-        return !sessionLogger.getSessionId().isEmpty
     }
 }
