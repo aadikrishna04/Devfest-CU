@@ -38,8 +38,11 @@ class StreamViewModel: ObservableObject {
     let audioManager = AudioManager()
     let wsManager = WebSocketManager()
     let toolExecutor = ToolExecutor()
+    let phoneCameraCapture = PhoneCameraCapture()
 
     private var streamSession: StreamSession
+    private var isUsingPhoneCamera = false
+    private var phoneCameraFrameCancellable: AnyCancellable?
     private var stateToken: AnyListenerToken?
     private var frameToken: AnyListenerToken?
     private var errorToken: AnyListenerToken?
@@ -195,13 +198,85 @@ class StreamViewModel: ObservableObject {
         startFrameSampling()
     }
 
+    func startStreamingWithPhoneCamera(emergency: Bool = false) async {
+        isUsingPhoneCamera = true
+
+        // 1. Set up audio session
+        do {
+            try audioManager.setupAudioSession()
+        } catch {
+            showError("Audio setup failed: \(error.localizedDescription)")
+            isUsingPhoneCamera = false
+            return
+        }
+
+        // 2. Request mic + speech permission
+        let hasPerms = await audioManager.requestPermissions()
+        if !hasPerms {
+            showError("Microphone or speech recognition permission denied.")
+            isUsingPhoneCamera = false
+            return
+        }
+
+        // 3. Request phone camera permission
+        let cameraGranted = await phoneCameraCapture.requestPermission()
+        if !cameraGranted {
+            showError("Camera permission denied. Enable it in Settings to use phone camera.")
+            isUsingPhoneCamera = false
+            return
+        }
+
+        if emergency {
+            audioManager.alwaysActive = true
+        }
+
+        // 4. Brief delay for audio session
+        try? await Task.sleep(nanoseconds: 500_000_000)
+
+        // 5. Start phone camera capture and wire frames to currentFrame
+        phoneCameraCapture.start()
+        if let err = phoneCameraCapture.errorMessage {
+            showError(err)
+            isUsingPhoneCamera = false
+            return
+        }
+        phoneCameraFrameCancellable = phoneCameraCapture.$currentFrame
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] frame in
+                self?.currentFrame = frame
+            }
+
+        streamingStatus = .streaming
+
+        // 6. Connect WebSocket to Modal backend
+        wsManager.connect(to: BackendConfig.webSocketURL)
+
+        // 7. Start audio capture
+        audioManager.startCapture { [weak self] audioData in
+            self?.wsManager.sendAudio(audioData)
+        }
+
+        // 8. Start frame sampling
+        startFrameSampling()
+    }
+
     func stopStreaming() async {
         frameSamplingTask?.cancel()
         frameSamplingTask = nil
         audioManager.stopCapture()
         toolExecutor.stopAll()
         wsManager.disconnect()
-        await streamSession.stop()
+
+        if isUsingPhoneCamera {
+            phoneCameraFrameCancellable?.cancel()
+            phoneCameraFrameCancellable = nil
+            phoneCameraCapture.stop()
+            currentFrame = nil
+            streamingStatus = .stopped
+            isUsingPhoneCamera = false
+        } else {
+            await streamSession.stop()
+        }
     }
 
     func dismissError() {

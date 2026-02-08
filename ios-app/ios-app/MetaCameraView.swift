@@ -6,6 +6,7 @@ struct MetaCameraView: View {
     @ObservedObject var viewModel: WearablesViewModel
     @StateObject private var streamVM: StreamViewModel
     @State private var selectedPage = 0
+    @State private var showAEDHospitalMap = false
 
     init(wearables: WearablesInterface, viewModel: WearablesViewModel) {
         self.wearables = wearables
@@ -31,6 +32,11 @@ struct MetaCameraView: View {
         }
         .onDisappear {
             Task { await streamVM.stopStreaming() }
+        }
+        .fullScreenCover(isPresented: $showAEDHospitalMap) {
+            NavigationStack {
+                AEDHospitalMapView()
+            }
         }
     }
 
@@ -87,9 +93,13 @@ struct MetaCameraView: View {
                         .padding(.horizontal, 28)
                         .padding(.top, 44)
 
+                    mapSection
+                        .padding(.horizontal, 28)
+                        .padding(.top, 32)
+
                     Spacer(minLength: 60)
                 }
-                .frame(minHeight: UIScreen.main.bounds.height - 100)
+                .frame(maxWidth: .infinity, minHeight: UIScreen.main.bounds.height - 100, alignment: .leading)
             }
         }
     }
@@ -183,6 +193,21 @@ struct MetaCameraView: View {
                             .foregroundColor(MedkitTheme.textSecondary)
                     }
                 }
+
+                // Fallback: use phone camera when glasses don't work
+                Button(action: { startSessionWithPhoneCamera(emergency: false) }) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "camera.fill")
+                        Text("Use Phone Camera Instead")
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(MedkitTheme.accent)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(MedkitTheme.accentVeryLight)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+                .padding(.top, 8)
             } else {
                 // Start session button
                 Button(action: { startSession(emergency: false) }) {
@@ -212,7 +237,66 @@ struct MetaCameraView: View {
                         .font(.subheadline)
                         .foregroundColor(MedkitTheme.textSecondary)
                 }
+
+                // Fallback when glasses aren't available
+                if !streamVM.hasActiveDevice {
+                    Button(action: { startSessionWithPhoneCamera(emergency: false) }) {
+                        HStack(spacing: 10) {
+                            Image(systemName: "camera.fill")
+                            Text("Use Phone Camera Instead")
+                                .fontWeight(.medium)
+                        }
+                        .foregroundColor(MedkitTheme.accent)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(MedkitTheme.accentVeryLight)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                    }
+                    .padding(.top, 8)
+                }
             }
+        }
+    }
+
+    // MARK: Map Section (AEDs, Hospitals & Pharmacies)
+
+    private var mapSection: some View {
+        Button(action: { showAEDHospitalMap = true }) {
+            HStack(alignment: .center, spacing: 16) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(MedkitTheme.accentVeryLight)
+                        .frame(width: 48, height: 48)
+                    Image(systemName: "map.fill")
+                        .font(.title3)
+                        .foregroundColor(MedkitTheme.accent)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("AEDs, Hospitals & Pharmacies Near You")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(MedkitTheme.textPrimary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("Find defibrillators, hospitals, and pharmacies on a map")
+                        .font(.caption)
+                        .foregroundColor(MedkitTheme.textSecondary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.medium))
+                    .foregroundColor(MedkitTheme.textSecondary.opacity(0.4))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(14)
+            .background(MedkitTheme.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
         }
     }
 
@@ -623,5 +707,9 @@ struct MetaCameraView: View {
             streamVM.audioManager.alwaysActive = true
         }
         Task { await streamVM.startStreaming() }
+    }
+
+    private func startSessionWithPhoneCamera(emergency: Bool) {
+        Task { await streamVM.startStreamingWithPhoneCamera(emergency: emergency) }
     }
 }
