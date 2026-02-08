@@ -26,6 +26,13 @@ Pods/
 # Environment secrets
 .env
 
+# Node / frontend (Website)
+node_modules/
+build/
+dist/
+.env.local
+.vercel
+
 # Other
 *.log
 *.tmp

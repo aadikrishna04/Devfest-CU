@@ -1,0 +1,41 @@
+export function Hero() {
+  return (
+    <>
+      {/* Team names at top - spread across the bar */}
+      <div className="w-full py-3 px-6 sm:px-12 bg-white dark:bg-gray-950">
+        <div className="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-y-3 text-lg md:text-xl text-gray-500 dark:text-gray-400" style={{ fontFamily: 'Times New Roman, serif' }}>
+          <span>Ansh Krishna</span>
+          <span>Jonathan Wang</span>
+          <span>Aadit Krishna</span>
+          <span>Armaan Agrawal</span>
+        </div>
+      </div>
+
+      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-white dark:bg-gray-950">
+        {/* Animated orb background */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-20 dark:opacity-10">
+          <div className="w-[600px] h-[600px] rounded-full bg-gradient-to-br from-[#D4594D]/30 to-[#EB9E94]/30 blur-3xl animate-pulse" 
+               style={{ 
+                 animationDuration: '4s'
+               }} 
+          />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 max-w-6xl mx-auto px-6 text-center py-16">
+          <div className="mb-6">
+            <h1 className="text-5xl md:text-6xl tracking-tight mb-4 text-gray-900 dark:text-white">
+              Medkit
+            </h1>
+            <p className="text-xl md:text-2xl text-[#D4594D] dark:text-[#EB9E94] mb-3">
+              First-aid guidance in your ear, hands-free
+            </p>
+          </div>
+          <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
+            An AI first-aid coach for Meta smart glasses. Voice-guided, hands-free emergency support with real-time visual aids.
+          </p>
+        </div>
+      </section>
+    </>
+  );
+}
